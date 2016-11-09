@@ -8,5 +8,10 @@ setup(
     install_requires=[
         'pychef',
         'boto3'
-    ]
+    ],
+    entry_points={
+        'console_scripts': [
+            'chef_prune = cheff.__main__:main'
+        ]
+    }
 )
