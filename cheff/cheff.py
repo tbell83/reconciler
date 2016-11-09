@@ -1,5 +1,5 @@
 import boto3
-import util
+import util.util as util
 import chef as pychef
 
 
@@ -37,10 +37,8 @@ class chef:
 
     def delete_chef_node(self, nodeId):
         try:
-            node = pychef.Node(nodeId, api=self.chef_api)
-            node.delete(api=self.chef_api)
-            client = pychef.Client(nodeId, api=self.chef_api)
-            client.delete(api=self.chef_api)
+            pychef.Node(nodeId, api=self.chef_api).delete(api=self.chef_api)
+            pychef.Client(nodeId, api=self.chef_api).delete(api=self.chef_api)
             return True
         except Exception as e:
             return e

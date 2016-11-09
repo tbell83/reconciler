@@ -1,4 +1,4 @@
-import cheff
+import cheff.cheff as cheff
 
 profiles = [
     'prod',
