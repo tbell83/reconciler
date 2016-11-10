@@ -9,9 +9,8 @@ setup(
         'pychef',
         'boto3'
     ],
-    entry_points={
-        'console_scripts': [
-            'dfchef = cheff.__main__:main'
-        ]
-    }
-)
+    entry_points='''
+        [console_scripts]
+        dfchef = cheff.__main__:main
+    ''',
+    )
