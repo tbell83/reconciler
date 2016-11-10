@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name='chef_prune',
+    name='dfchef',
     version='1.0',
     packages=['cheff', 'util'],
     include_package_data=True,
@@ -11,7 +11,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'chef_prune = cheff.__main__:main'
+            'dfchef = cheff.__main__:main'
         ]
     }
 )

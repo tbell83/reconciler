@@ -1,11 +1,12 @@
 VIRTUALENV_DIR = ${HOME}/.virtualenv
+PROJECT_NAME = dfchef
 
-all: ${VIRTUALENV_DIR}/chef_prune
-	. ${VIRTUALENV_DIR}/chef_prune/bin/activate && pip install --upgrade .
+all: ${VIRTUALENV_DIR}/${PROJECT_NAME}
+	. ${VIRTUALENV_DIR}/${PROJECT_NAME}/bin/activate && pip install --upgrade .
 
-${VIRTUALENV_DIR}/chef_prune:
+${VIRTUALENV_DIR}/${PROJECT_NAME}:
 	mkdir -p ${VIRTUALENV_DIR}
-	cd ${VIRTUALENV_DIR} && virtualenv -p /usr/bin/python2.7 chef_prune
+	cd ${VIRTUALENV_DIR} && virtualenv -p /usr/bin/python2.7 ${PROJECT_NAME}
 
 clean:
 	rm -rf build dist *.egg-info
