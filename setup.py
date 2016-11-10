@@ -11,6 +11,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        dfchef = cheff.__main__:main
+        dfchef=cheff.__main__:main
     ''',
     )
