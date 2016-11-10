@@ -6,7 +6,7 @@ import datetime
 def status(chef_client):
     failures = chef_client.get_convergence_status()
     status = []
-    for failure in failures:
+    for failure in sorted(failures, key=lambda failure: failures[failure]):
         seconds_since_fail = int((
             datetime.datetime.now() - failures[failure]
         ).total_seconds())
@@ -16,10 +16,8 @@ def status(chef_client):
             msg = '{} minutes ago'.format(seconds_since_fail/60)
         elif seconds_since_fail < 86400:
             msg = '{} hours ago'.format(seconds_since_fail/3600)
-        elif seconds_since_fail < 2628000:
-            msg = '{} days ago'.format(seconds_since_fail/86400)
         else:
-            msg = '{} months ago'.format(seconds_since_fail/2628000)
+            msg = '{} days ago'.format(seconds_since_fail/86400)
         status.append('{}:\t{}'.format(msg, failure))
     return status
 
