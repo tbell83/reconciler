@@ -1,16 +1,11 @@
 import boto3
 import util.util as util
 import chef as pychef
+import datetime
 
 
-class chef:
+class aws:
     def __init__(self, profile):
-        self.knife = util.get_knife_creds()
-        self.chef_api = pychef.ChefAPI(
-            self.knife['chef_server_url'],
-            self.knife['client_key'],
-            self.knife['node_name']
-        )
         self.profile = util.get_aws_creds(profile)
         self.client = boto3.client(
             'ec2',
@@ -26,14 +21,21 @@ class chef:
                 instanceIds.append(instance['InstanceId'])
         return instanceIds
 
+
+class chef:
+    def __init__(self):
+        self.knife = util.get_knife_creds()
+        self.chef_api = pychef.ChefAPI(
+            self.knife['chef_server_url'],
+            self.knife['client_key'],
+            self.knife['node_name']
+        )
+
     def get_chef_nodes(self):
-        instanceIds = []
-        for node in sorted(
-            pychef.Search('node', 'roles:*', api=self.chef_api),
-            key=lambda node: node['name']
-        ):
-            instanceIds.append(node['name'])
-        return instanceIds
+        nodes = []
+        for node in pychef.node.Node.list(api=self.chef_api):
+            nodes.append(node)
+        return nodes
 
     def delete_chef_node(self, nodeId):
         try:
@@ -42,3 +44,14 @@ class chef:
             return True
         except Exception as e:
             return e
+
+    def get_convergence_status(self):
+        failed_nodes = {}
+        now = datetime.datetime.now()
+        for node in self.get_chef_nodes():
+            last_converge = datetime.datetime.fromtimestamp(pychef.Node(
+                node, api=self.chef_api
+            ).attributes['ohai_time'])
+            if (now - last_converge).seconds > 720:
+                failed_nodes[node] = last_converge
+        return failed_nodes
