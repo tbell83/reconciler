@@ -1,6 +1,7 @@
 from cheff import chef, aws
 import argparse
 import datetime
+import re
 
 
 def status(chef_client):
@@ -20,6 +21,24 @@ def status(chef_client):
             msg = '{} days ago'.format(seconds_since_fail/86400)
         status.append('{}:\t{}'.format(msg, failure))
     return status
+
+
+def dedupe(chef_client):
+    nodes = chef_client.get_chef_nodes()
+    dupes = []
+    for node in nodes:
+        id = node.split('.')[-1]
+        matches = []
+        for i in nodes:
+            if re.search(id, i):
+                matches.append(i)
+        if len(matches) > 1:
+            dupes.append(sorted(matches))
+    deduped = []
+    for dupeset in sorted(dupes):
+        if dupeset not in deduped:
+            deduped.append(dupeset)
+    return deduped
 
 
 def prune(chef_client, execute=False, profiles=['drama9', 'prod']):
@@ -56,11 +75,25 @@ def main(args=None):
     parser.add_argument('command')
     args = parser.parse_args()
     chef_client = chef()
+    if args.execute is False and args.command != 'status':
+        print '!!!PRE-FLIGHT, NOT REMOVING ANYTHING!!!\n' \
+            'Use -e to execute changeset'
     if args.command == 'status':
         for node in status(chef_client):
             print node
     elif args.command == 'prune':
         prune(chef_client, execute=args.execute)
+    elif args.command == 'dedupe':
+        dupes = dedupe(chef_client)
+        for dupeset in dupes:
+            nodes = chef_client.get_convergence_status(nodes=dupeset)
+            for node in nodes:
+                print 'removing {} which last converged:\t\t{}'.format(
+                    node,
+                    nodes[node]
+                )
+                if args.execute:
+                    chef_client.delete_chef_node(node)
 
 
 if __name__ == '__main__':
