@@ -1,5 +1,5 @@
 VIRTUALENV_DIR = ${HOME}/.virtualenv
-PROJECT_NAME = dfchef
+PROJECT_NAME = reconciler
 
 all: ${VIRTUALENV_DIR}/${PROJECT_NAME}
 	. ${VIRTUALENV_DIR}/${PROJECT_NAME}/bin/activate && pip install --upgrade .

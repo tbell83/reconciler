@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name='dfchef',
+    name='reconciler',
     version='1.0',
     packages=['cheff', 'util'],
     include_package_data=True,
@@ -11,6 +11,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        dfchef=cheff.__main__:main
+        reconciler=cheff.__main__:main
     ''',
     )
