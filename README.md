@@ -1,5 +1,9 @@
 # Reconciler
-Reconciler ECS and Chef nodes, pruning when necessary
+Reconciles ECS and Chef nodes, pruning when necessary
+
+## Setup
+reconciler expects aws creds to be in `~/.aws/config` and knife creds to be in
+`~/.chef/knife.rb`
 
 ## Usage
 `reconciler`
