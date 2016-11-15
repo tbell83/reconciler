@@ -44,7 +44,7 @@ def get_knife_creds():
                 knifig[key] = value.replace(
                     '#{current_dir}',
                     KNIFE_PATH
-                ).replace('"', '')
+                ).replace('"', '').replace("'", '')
             except:
                 continue
 
