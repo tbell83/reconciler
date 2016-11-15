@@ -4,8 +4,30 @@ import datetime
 import re
 
 
-def status(chef_client):
-    failures = chef_client.get_convergence_status()
+def get_chefs():
+    chef_client = chef()
+    return chef_client.get_chef_nodes()
+
+
+def get_ecss(profiles=['drama9', 'prod']):
+    ecs_instance_ids = []
+    for profile in profiles:
+        aws_client = aws(profile)
+        ecs_instance_ids += aws_client.get_instance_ids()
+    return sorted(ecs_instance_ids)
+
+
+def get_dead_chefs(chefs, ecss):
+    dead_chefs = []
+    for instance in chefs:
+        if instance.split('.')[-1] not in ecss:
+            dead_chefs.append(instance)
+    return dead_chefs
+
+
+def status(show_all=False):
+    chef_client = chef()
+    failures = chef_client.get_convergence_status(show_all=show_all)
     status = []
     for failure in sorted(failures, key=lambda failure: failures[failure]):
         seconds_since_fail = int((
@@ -23,8 +45,8 @@ def status(chef_client):
     return status
 
 
-def dedupe(chef_client):
-    nodes = chef_client.get_chef_nodes()
+def get_dupes(chefs):
+    nodes = chefs
     dupes = []
     for node in nodes:
         id = node.split('.')[-1]
@@ -41,30 +63,46 @@ def dedupe(chef_client):
     return deduped
 
 
-def prune(chef_client, execute=False, profiles=['drama9', 'prod']):
-    ecs_instance_ids = []
-    for profile in profiles:
-        aws_client = aws(profile)
-        ecs_instance_ids += aws_client.get_instance_ids()
-
-    chef_node_instance_ids = chef_client.get_chef_nodes()
-    ecs_instance_ids = sorted(ecs_instance_ids)
-
-    print 'Chef Instances: {}\nEC2 Instances: {}'.format(
-        len(chef_node_instance_ids), len(ecs_instance_ids)
-    )
-
-    dead_chefs = []
-    for instance in chef_node_instance_ids:
-        if instance.split('.')[-1] not in ecs_instance_ids:
-            dead_chefs.append(instance)
-
-    print 'Orphaned Chef Nodes: {}'.format(len(dead_chefs))
-
+def prune(execute=False):
+    chef_client = chef()
+    dead_chefs = get_dead_chefs(chefs=get_chefs(), ecss=get_ecss())
     for node in dead_chefs:
         print 'Removing node and client object for {}'.format(node)
         if execute:
             chef_client.delete_chef_node(node)
+
+
+def report(print_out=True):
+    ecs_instance_ids = get_ecss()
+    chef_node_instance_ids = get_chefs()
+    dead_chefs = get_dead_chefs(
+        chefs=chef_node_instance_ids,
+        ecss=ecs_instance_ids
+    )
+    dupes = get_dupes(chef_node_instance_ids)
+    output = {}
+    output['Chef Instances'] = chef_node_instance_ids
+    output['EC2 Instances'] = ecs_instance_ids
+    output['Orphaned Chef Nodes'] = dead_chefs
+    output['Duplicate Nodes'] = dupes
+    if print_out:
+        for item in output:
+            print '{}\t{}'.format(len(output[item]), item)
+    return output
+
+
+def dedupe(execute=False):
+    chef_client = chef()
+    dupes = get_dupes(get_chefs())
+    for dupeset in dupes:
+        nodes = chef_client.get_convergence_status(target_nodes=dupeset)
+        for node in nodes:
+            print 'removing {} which last converged: {}'.format(
+                node,
+                nodes[node]
+            )
+            if execute:
+                chef_client.delete_chef_node(node)
 
 
 def main(args=None):
@@ -72,29 +110,27 @@ def main(args=None):
     parser.add_argument(
         '-e', dest='execute', action='store_true', default=False
     )
-    parser.add_argument('command')
+    parser.add_argument(
+        '-a', dest='all', action='store_true', default=False
+    )
+    parser.add_argument('command', nargs='?', default=None)
     args = parser.parse_args()
-    chef_client = chef()
-    if args.execute is False and args.command != 'status':
+    if args.execute is False \
+        and args.command != 'status' \
+            and args.command:
         print '!!!PRE-FLIGHT, NOT REMOVING ANYTHING!!!\n' \
             'Use -e to execute changeset'
     if args.command == 'status':
-        for node in status(chef_client):
+        for node in status(args.all):
             print node
     elif args.command == 'prune':
-        prune(chef_client, execute=args.execute)
+        prune(execute=args.execute)
+        if report(print_out=False)['Duplicate Nodes'] > 0:
+            dedupe(execute=args.execute)
     elif args.command == 'dedupe':
-        dupes = dedupe(chef_client)
-        for dupeset in dupes:
-            nodes = chef_client.get_convergence_status(nodes=dupeset)
-            for node in nodes:
-                print 'removing {} which last converged:\t\t{}'.format(
-                    node,
-                    nodes[node]
-                )
-                if args.execute:
-                    chef_client.delete_chef_node(node)
-
+        dedupe(execute=args.execute)
+    else:
+        report()
 
 if __name__ == '__main__':
     main()
