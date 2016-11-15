@@ -5,7 +5,8 @@ Reconciles ECS and Chef nodes, pruning when necessary
 reconciler expects aws creds to be in `~/.aws/config` and knife creds to be in
 `~/.chef/knife.rb`
 
-To install clone this repo and run `make`
+To install clone this repo and run `make` .
+
 For ease of use you can add an alias to `~/.virtualenv/reconciler/bin/reconciler`
 
 ## Usage
