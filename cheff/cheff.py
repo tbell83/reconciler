@@ -45,16 +45,19 @@ class chef:
         except Exception as e:
             return e
 
-    def get_convergence_status(self, target_nodes=None, fail_only=True):
+    def get_convergence_status(self, target_nodes=None, show_all=True):
         nodes = {}
         now = datetime.datetime.now()
         if target_nodes is None:
             target_nodes = self.get_chef_nodes()
         for node in target_nodes:
-            last_converge = datetime.datetime.fromtimestamp(pychef.Node(
-                node, api=self.chef_api
-            ).attributes['ohai_time'])
-            if fail_only:
+            try:
+                last_converge = datetime.datetime.fromtimestamp(pychef.Node(
+                    node, api=self.chef_api
+                ).attributes['ohai_time'])
+            except:
+                continue
+            if not show_all:
                 if (now - last_converge).seconds > 720:
                     nodes[node] = last_converge
             else:
