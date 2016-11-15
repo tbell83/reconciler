@@ -18,7 +18,8 @@ class aws:
         instanceIds = []
         for reservation in instances['Reservations']:
             for instance in reservation['Instances']:
-                instanceIds.append(instance['InstanceId'])
+                if instance['State']['Name'] == 'running':
+                    instanceIds.append(instance['InstanceId'])
         return instanceIds
 
 
