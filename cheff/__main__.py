@@ -17,9 +17,12 @@ def get_ecss(profiles=['drama9', 'prod']):
     return sorted(ecs_instance_ids)
 
 
-def get_dead_chefs(chefs, ecss):
+def get_dead_chefs(chefs=get_chefs(), ecss=get_ecss()):
     dead_chefs = []
+    for thing in ecss:
+        print thing
     for instance in chefs:
+        print instance.split('.')[-1]
         if instance.split('.')[-1] not in ecss:
             dead_chefs.append(instance)
     return dead_chefs
@@ -45,7 +48,7 @@ def status(show_all=False):
     return status
 
 
-def get_dupes(chefs):
+def get_dupes(chefs=get_chefs()):
     nodes = chefs
     dupes = []
     for node in nodes:
@@ -73,16 +76,11 @@ def prune(execute=False):
 
 
 def report(print_out=True):
-    ecs_instance_ids = get_ecss()
-    chef_node_instance_ids = get_chefs()
-    dead_chefs = get_dead_chefs(
-        chefs=chef_node_instance_ids,
-        ecss=ecs_instance_ids
-    )
-    dupes = get_dupes(chef_node_instance_ids)
+    dead_chefs = get_dead_chefs()
+    dupes = get_dupes()
     output = {}
-    output['Chef Instances'] = chef_node_instance_ids
-    output['EC2 Instances'] = ecs_instance_ids
+    output['Chef Instances'] = get_chefs()
+    output['EC2 Instances'] = get_ecss()
     output['Orphaned Chef Nodes'] = dead_chefs
     output['Duplicate Nodes'] = dupes
     if print_out:
