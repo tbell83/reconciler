@@ -11,7 +11,7 @@ class aws:
             'ec2',
             aws_access_key_id=self.profile['AWS_ACCESS_KEY_ID'],
             aws_secret_access_key=self.profile['AWS_SECRET_ACCESS_KEY'],
-            region=self.profile['REGION']
+            region_name=self.profile['REGION']
         )
 
     def get_instance_ids(self):
