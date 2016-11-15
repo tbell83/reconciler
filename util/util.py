@@ -23,10 +23,6 @@ def get_aws_creds(profile):
     AWS_ACCESS_KEY_ID = profiles[profile]['aws_access_key_id']
     AWS_SECRET_ACCESS_KEY = profiles[profile]['aws_secret_access_key']
     REGION = profiles[profile]['region']
-
-    print 'Farts'
-    print REGION
-
     return {'AWS_ACCESS_KEY_ID': AWS_ACCESS_KEY_ID,
             'AWS_SECRET_ACCESS_KEY': AWS_SECRET_ACCESS_KEY,
             'REGION': REGION}
