@@ -97,12 +97,13 @@ def dedupe(execute=False):
     for dupeset in dupes:
         nodes = chef_client.get_convergence_status(target_nodes=dupeset)
         for node in nodes:
-            print 'removing {} which last converged: {}'.format(
-                node,
-                nodes[node]
-            )
-            if execute:
-                chef_client.delete_chef_node(node)
+            if (datetime.datetime.now() - nodes[node]).total_seconds() > 900:
+                print 'removing {} which last converged: {}'.format(
+                    node,
+                    nodes[node]
+                )
+                if execute:
+                    chef_client.delete_chef_node(node)
 
 
 def main(args=None):
