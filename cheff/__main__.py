@@ -19,10 +19,7 @@ def get_ecss(profiles=['drama9', 'prod']):
 
 def get_dead_chefs(chefs=get_chefs(), ecss=get_ecss()):
     dead_chefs = []
-    for thing in ecss:
-        print thing
     for instance in chefs:
-        print instance.split('.')[-1]
         if instance.split('.')[-1] not in ecss:
             dead_chefs.append(instance)
     return dead_chefs
