@@ -2,6 +2,8 @@ import boto3
 import util.util as util
 import chef as pychef
 import datetime
+import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 
 class aws:
@@ -26,6 +28,7 @@ class aws:
 
 class chef:
     def __init__(self):
+        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
         self.knife = util.get_knife_creds()
         self.chef_api = pychef.ChefAPI(
             self.knife['chef_server_url'],
