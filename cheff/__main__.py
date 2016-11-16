@@ -3,6 +3,7 @@ import argparse
 import datetime
 import re
 import logging
+logging.captureWarnings(True)
 
 
 def get_chefs():
@@ -103,7 +104,6 @@ def dedupe(execute=False):
 
 
 def main(args=None):
-    logging.captureWarnings(True)
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '-e', dest='execute', action='store_true', default=False
