@@ -7,7 +7,8 @@ setup(
     include_package_data=True,
     install_requires=[
         'pychef',
-        'boto3'
+        'boto3',
+        'urllib3'
     ],
     entry_points='''
         [console_scripts]
